@@ -70,6 +70,7 @@ public class Config {
 
 	@Data
 	public static class InventoryConfig {
+		private String updateTopic;
 		private String updateStream;
 		private String stream;
 		private String index;

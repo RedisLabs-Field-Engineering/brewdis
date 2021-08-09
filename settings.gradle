@@ -16,7 +16,7 @@ buildscript {
 
 apply plugin: 'com.redislabs.gradle.redislabs-parentbuild'
 
-rootProject.name = 'brewdis'
+rootProject.name = 'brewdis-kafka'
 
 projects {
     directories = ['demo']

@@ -1,10 +1,16 @@
 package com.redislabs.demo.brewdis;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.redislabs.mesclun.RedisModulesCommands;
 import com.redislabs.mesclun.StatefulRedisModulesConnection;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.kafka.config.TopicBuilder;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -19,11 +25,15 @@ import static com.redislabs.demo.brewdis.BrewdisField.*;
 @Slf4j
 public class InventoryDemand implements InitializingBean {
 
+
     @Autowired
     private Config config;
     @Autowired
     private StatefulRedisModulesConnection<String, String> connection;
+    @Autowired
+    KafkaTemplate<String, String> kafkaTemplate;
     private OfInt delta;
+    private ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public void afterPropertiesSet() {
@@ -31,7 +41,7 @@ public class InventoryDemand implements InitializingBean {
     }
 
     @Scheduled(fixedRateString = "${inventory.generator.rate}")
-    public void generate() {
+    public void generate() throws JsonProcessingException {
         RedisModulesCommands<String, String> commands = connection.sync();
         for (String session : commands.smembers("sessions")) {
             String store = commands.srandmember("session:stores:" + session);
@@ -46,9 +56,14 @@ public class InventoryDemand implements InitializingBean {
             update.put(STORE_ID, store);
             update.put(PRODUCT_ID, sku);
             update.put(ALLOCATED, String.valueOf(delta.nextInt()));
-            commands.xadd(config.getInventory().getUpdateStream(), update);
+            kafkaTemplate.send(config.getInventory().getUpdateTopic(), mapper.writeValueAsString(update));
         }
 
+    }
+
+    @Bean
+    public NewTopic topic() {
+        return TopicBuilder.name(config.getInventory().getUpdateTopic()).build();
     }
 
 }

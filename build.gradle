@@ -1,9 +1,9 @@
 config {
     info {
-        description = 'Brewdis Demo'
+        description = 'Brewdis Kafka Demo'
         inceptionYear = '2020'
         vendor = 'Redis Labs'
-        tags = ['redis', 'redisearch', 'inventory', 'real-time', 'retail']
+        tags = ['redis', 'redisearch', 'kafka', 'connect', 'inventory', 'real-time', 'retail']
         links {
             website = "https://github.com/redis-developer/${project.rootProject.name}"
             issueTracker = "https://github.com/redis-developer/${project.rootProject.name}/issues"

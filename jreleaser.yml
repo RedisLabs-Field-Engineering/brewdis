@@ -1,8 +1,8 @@
 project:
-  name: brewdis
-  description: Brewdis Demo
-  longDescription: Real-time inventory demo using Redis
-  website: https://github.com/redis-developer/brewdis
+  name: brewdis-kafka
+  description: Brewdis Kafka Demo
+  longDescription: Real-time inventory demo using Redis and Kafka
+  website: https://github.com/redis-developer/brewdis-kafka
   authors:
     - Julien Ruaux
   license: Apache-2.0
