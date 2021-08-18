@@ -1,8 +1,8 @@
 package com.redislabs.demo.brewdis;
 
-import com.redislabs.mesclun.RedisModulesCommands;
-import com.redislabs.mesclun.StatefulRedisModulesConnection;
-import com.redislabs.mesclun.search.*;
+import com.redis.lettucemod.api.StatefulRedisModulesConnection;
+import com.redis.lettucemod.api.sync.RedisModulesCommands;
+import com.redis.lettucemod.api.search.*;
 import io.lettuce.core.RedisCommandExecutionException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
@@ -45,7 +45,7 @@ public class InventoryManager implements InitializingBean, DisposableBean, Strea
     private PrimitiveIterator.OfInt reserved;
     private PrimitiveIterator.OfInt virtualHold;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void afterPropertiesSet() throws Exception {
         Random random = new Random();
@@ -58,22 +58,22 @@ public class InventoryManager implements InitializingBean, DisposableBean, Strea
         String index = config.getInventory().getIndex();
         log.info("Dropping {} index", index);
         try {
-            commands.dropIndex(index);
+            commands.dropindex(index);
         } catch (RedisCommandExecutionException e) {
             if (!e.getMessage().equals("Unknown Index name")) {
                 throw e;
             }
         }
         log.info("Creating {} index", index);
-        commands.create(index, CreateOptions.<String, String>builder().prefix(config.getInventory().getKeyspace() + config.getKeySeparator()).build(), Field.tag(STORE_ID).sortable(true).build(),
-                Field.tag(PRODUCT_ID).sortable(true).build(),
+        commands.create(index, CreateOptions.<String, String>builder().prefix(config.getInventory().getKeyspace() + config.getKeySeparator()).build(), Field.tag(STORE_ID).sortable().build(),
+                Field.tag(PRODUCT_ID).sortable().build(),
                 Field.geo(LOCATION).build(),
-                Field.numeric(AVAILABLE_TO_PROMISE).sortable(true).build(),
-                Field.numeric(ON_HAND).sortable(true).build(),
-                Field.numeric(ALLOCATED).sortable(true).build(),
-                Field.numeric(RESERVED).sortable(true).build(),
-                Field.numeric(VIRTUAL_HOLD).sortable(true).build(),
-                Field.numeric(EPOCH).sortable(true).build());
+                Field.numeric(AVAILABLE_TO_PROMISE).sortable().build(),
+                Field.numeric(ON_HAND).sortable().build(),
+                Field.numeric(ALLOCATED).sortable().build(),
+                Field.numeric(RESERVED).sortable().build(),
+                Field.numeric(VIRTUAL_HOLD).sortable().build(),
+                Field.numeric(EPOCH).sortable().build());
         commands.del(config.getInventory().getUpdateStream());
         this.container = StreamMessageListenerContainer.create(redis.getConnectionFactory(), StreamMessageListenerContainerOptions.builder().pollTimeout(Duration.ofMillis(config.getStreamPollTimeout())).build());
         container.start();
@@ -176,7 +176,7 @@ public class InventoryManager implements InitializingBean, DisposableBean, Strea
         String query = "@" + EPOCH + ":[0 " + time.toEpochSecond() + "]";
         String index = config.getInventory().getIndex();
         RedisModulesCommands<String, String> commands = connection.sync();
-        SearchResults<String, String> results = commands.search(index, query, SearchOptions.builder().noContent(true)
+        SearchResults<String, String> results = commands.search(index, query, SearchOptions.<String, String>builder().noContent(true)
                 .limit(SearchOptions.Limit.offset(0).num(config.getInventory().getCleanup().getSearchLimit())).build());
         if (!results.isEmpty()) {
             log.info("Deleting {} docs", results.size());

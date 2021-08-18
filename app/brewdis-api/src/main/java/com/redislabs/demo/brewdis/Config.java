@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-@ConfigurationProperties(prefix = "")
+@ConfigurationProperties
 @EnableAutoConfiguration
 @Data
 public class Config {
@@ -61,6 +61,7 @@ public class Config {
 		private long limit;
 		private String index;
 		private boolean fuzzy;
+		private long maxSuggestions;
 	}
 
 	@Data

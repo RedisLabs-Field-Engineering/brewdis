@@ -1,20 +1,15 @@
 package com.redislabs.demo.brewdis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redis.lettucemod.api.StatefulRedisModulesConnection;
+import com.redis.lettucemod.api.sync.RedisModulesCommands;
+import com.redis.lettucemod.api.search.*;
 import com.redislabs.demo.brewdis.Config.StompConfig;
 import com.redislabs.demo.brewdis.web.BrewerySuggestion;
 import com.redislabs.demo.brewdis.web.Category;
 import com.redislabs.demo.brewdis.web.Query;
 import com.redislabs.demo.brewdis.web.ResultsPage;
 import com.redislabs.demo.brewdis.web.Style;
-import com.redislabs.mesclun.RedisModulesCommands;
-import com.redislabs.mesclun.StatefulRedisModulesConnection;
-import com.redislabs.mesclun.search.Document;
-import com.redislabs.mesclun.search.Order;
-import com.redislabs.mesclun.search.SearchOptions;
-import com.redislabs.mesclun.search.SearchResults;
-import com.redislabs.mesclun.search.Suggestion;
-import com.redislabs.mesclun.search.SuggetOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -26,28 +21,35 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.redislabs.demo.brewdis.BrewdisField.*;
+import static com.redislabs.demo.brewdis.BrewdisField.AVAILABLE_TO_PROMISE;
+import static com.redislabs.demo.brewdis.BrewdisField.BREWERY_NAME;
+import static com.redislabs.demo.brewdis.BrewdisField.CATEGORY_NAME;
+import static com.redislabs.demo.brewdis.BrewdisField.LEVEL;
+import static com.redislabs.demo.brewdis.BrewdisField.LOCATION;
+import static com.redislabs.demo.brewdis.BrewdisField.PRODUCT_DESCRIPTION;
+import static com.redislabs.demo.brewdis.BrewdisField.PRODUCT_ID;
+import static com.redislabs.demo.brewdis.BrewdisField.PRODUCT_NAME;
+import static com.redislabs.demo.brewdis.BrewdisField.STORE_ID;
+import static com.redislabs.demo.brewdis.BrewdisField.STYLE_NAME;
 
+@SuppressWarnings("unused")
 @RestController
 @RequestMapping(path = "/api")
 @CrossOrigin
 @Slf4j
 class WebController {
 
-    private final Random random = new Random();
     @Autowired
     private Config config;
     @Autowired
     private StatefulRedisModulesConnection<String, String> connection;
     @Autowired
     private DataLoader data;
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @GetMapping("/config/stomp")
     public StompConfig stompConfig() {
@@ -56,16 +58,16 @@ class WebController {
 
     @PostMapping("/products")
     public ResultsPage products(@RequestBody Query query,
-                                @RequestParam(name = "longitude", required = true) Double longitude,
-                                @RequestParam(name = "latitude", required = true) Double latitude, HttpSession session) {
+                                @RequestParam(name = "longitude") Double longitude,
+                                @RequestParam(name = "latitude") Double latitude, HttpSession session) {
         log.info("Searching for products around lon={} lat={}", longitude, latitude);
-        SearchOptions.SearchOptionsBuilder options = SearchOptions.builder()
-                .highlight(SearchOptions.Highlight.builder().field(PRODUCT_NAME).field(PRODUCT_DESCRIPTION)
+        SearchOptions.SearchOptionsBuilder<String,String> options = SearchOptions.<String,String>builder()
+                .highlight(SearchOptions.Highlight.<String,String>builder().field(PRODUCT_NAME).field(PRODUCT_DESCRIPTION)
                         .field(CATEGORY_NAME).field(STYLE_NAME).field(BREWERY_NAME)
-                        .tags(SearchOptions.Tags.builder().open("<mark>").close("</mark>").build()).build())
+                        .tags(SearchOptions.Tags.<String>builder().open("<mark>").close("</mark>").build()).build())
                 .limit(SearchOptions.Limit.offset(query.getOffset()).num(query.getPageSize()));
         if (query.getSortByField() != null) {
-            options.sortBy(SearchOptions.SortBy.field(query.getSortByField()).order(Order.valueOf(query.getSortByDirection())));
+            options.sortBy(SearchOptions.SortBy.<String,String>field(query.getSortByField()).order(Order.valueOf(query.getSortByDirection())));
         }
         String queryString = query.getQuery() == null || query.getQuery().length() == 0 ? "*" : query.getQuery();
         long startTime = System.currentTimeMillis();
@@ -120,21 +122,21 @@ class WebController {
             query += " " + config.tag(STORE_ID, store);
         }
         return connection.sync().search(config.getInventory().getIndex(), query,
-                SearchOptions.builder().sortBy(SearchOptions.SortBy.field(STORE_ID).order(Order.ASC))
+                SearchOptions.<String, String>builder().sortBy(SearchOptions.SortBy.<String, String>field(STORE_ID).order(Order.ASC))
                         .limit(SearchOptions.Limit.offset(0).num(config.getInventory().getSearchLimit())).build());
     }
 
     @GetMapping("/availability")
     public SearchResults<String, String> availability(@RequestParam(name = "sku", required = false) String sku,
-                                                      @RequestParam(name = "longitude", required = true) Double longitude,
-                                                      @RequestParam(name = "latitude", required = true) Double latitude) {
+                                                      @RequestParam(name = "longitude") Double longitude,
+                                                      @RequestParam(name = "latitude") Double latitude) {
         String query = geoCriteria(longitude, latitude);
         if (sku != null) {
             query += " " + config.tag(PRODUCT_ID, sku);
         }
         log.info("Searching for availability: {}", query);
         SearchResults<String, String> results = connection.sync().search(config.getInventory().getIndex(), query,
-                SearchOptions.builder().limit(SearchOptions.Limit.offset(0).num(config.getInventory().getSearchLimit()))
+                SearchOptions.<String, String>builder().limit(SearchOptions.Limit.offset(0).num(config.getInventory().getSearchLimit()))
                         .build());
         results.forEach(r -> r.put(LEVEL, config.getInventory().level(availableToPromise(r))));
         return results;
@@ -156,7 +158,7 @@ class WebController {
     public Stream<BrewerySuggestion> suggestBreweries(
             @RequestParam(name = "prefix", defaultValue = "", required = false) String prefix) {
         List<Suggestion<String>> results = connection.sync().sugget(config.getProduct().getBrewery().getIndex(),
-                prefix, SuggetOptions.builder().withPayloads(true).max(20l)
+                prefix, SuggetOptions.builder().withPayloads(true).max(20L)
                         .fuzzy(config.getProduct().getBrewery().isFuzzy()).build());
         return results.stream().map(s -> {
             BrewerySuggestion suggestion = new BrewerySuggestion();
@@ -174,12 +176,11 @@ class WebController {
     }
 
     @GetMapping("/foods")
-    public Stream<String> suggestFoods(
-            @RequestParam(name = "prefix", defaultValue = "", required = false) String prefix) {
+    public Stream<String> suggestFoods(@RequestParam(name = "prefix", defaultValue = "", required = false) String prefix) {
         List<Suggestion<String>> results = connection.sync().sugget(config.getProduct().getFoodPairings().getIndex(),
-                prefix, SuggetOptions.builder().withPayloads(true).max(20l)
+                prefix, SuggetOptions.builder().withPayloads(true).max(config.getProduct().getFoodPairings().getMaxSuggestions())
                         .fuzzy(config.getProduct().getFoodPairings().isFuzzy()).build());
-        return results.stream().map(s -> s.getString());
+        return results.stream().map(Suggestion::getString);
     }
 
 }

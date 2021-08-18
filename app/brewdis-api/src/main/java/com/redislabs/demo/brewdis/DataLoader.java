@@ -2,30 +2,24 @@ package com.redislabs.demo.brewdis;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redis.lettucemod.Utils;
+import com.redis.lettucemod.api.StatefulRedisModulesConnection;
+import com.redis.lettucemod.api.search.aggregate.GroupBy;
+import com.redis.lettucemod.api.search.aggregate.Limit;
+import com.redis.lettucemod.api.search.aggregate.SortBy;
+import com.redis.lettucemod.api.search.aggregate.reducers.CountDistinct;
+import com.redis.riot.MapProcessorOptions;
+import com.redis.riot.RedisOptions;
+import com.redis.riot.file.FileImportCommand;
+import com.redis.riot.file.RiotFile;
+import com.redis.riot.redis.HsetCommand;
 import com.redislabs.demo.brewdis.web.BrewerySuggestion;
 import com.redislabs.demo.brewdis.web.Category;
 import com.redislabs.demo.brewdis.web.Style;
-import com.redislabs.mesclun.RedisModulesAsyncCommands;
-import com.redislabs.mesclun.RedisModulesCommands;
-import com.redislabs.mesclun.StatefulRedisModulesConnection;
-import com.redislabs.mesclun.search.AggregateOptions;
-import com.redislabs.mesclun.search.AggregateResults;
-import com.redislabs.mesclun.search.CreateOptions;
-import com.redislabs.mesclun.search.Field;
-import com.redislabs.mesclun.search.IndexInfo;
-import com.redislabs.mesclun.search.Order;
-import com.redislabs.mesclun.search.RediSearchCommands;
-import com.redislabs.mesclun.search.RediSearchUtils;
-import com.redislabs.mesclun.search.SugaddOptions;
-import com.redislabs.mesclun.search.aggregate.GroupBy;
-import com.redislabs.mesclun.search.aggregate.Limit;
-import com.redislabs.mesclun.search.aggregate.SortBy;
-import com.redislabs.mesclun.search.aggregate.reducers.CountDistinct;
-import com.redislabs.riot.ProcessorOptions;
-import com.redislabs.riot.RedisOptions;
-import com.redislabs.riot.file.FileImportCommand;
-import com.redislabs.riot.file.RiotFile;
-import com.redislabs.riot.redis.HsetCommand;
+import com.redis.lettucemod.api.async.RedisModulesAsyncCommands;
+import com.redis.lettucemod.api.sync.RedisModulesCommands;
+import com.redis.lettucemod.api.search.*;
+import com.redis.lettucemod.api.sync.RediSearchCommands;
 import io.lettuce.core.LettuceFutures;
 import io.lettuce.core.RedisCommandExecutionException;
 import io.lettuce.core.RedisFuture;
@@ -92,38 +86,37 @@ public class DataLoader implements InitializingBean {
         loadFoodPairings();
     }
 
-    @SuppressWarnings("unchecked")
     private void loadStores() throws Exception {
         RediSearchCommands<String, String> commands = connection.sync();
         String index = config.getStore().getIndex();
         try {
-            IndexInfo<String, String> info = RediSearchUtils.getInfo(commands.indexInfo(index));
+            IndexInfo info = Utils.indexInfo(commands.indexInfo(index));
             if (info.getNumDocs() >= config.getStore().getCount()) {
                 log.info("Found {} stores - skipping load", Math.round(info.getNumDocs()));
                 return;
             }
-            commands.dropIndex(index);
+            commands.dropindex(index);
         } catch (RedisCommandExecutionException e) {
             if (!e.getMessage().equals("Unknown Index name")) {
                 throw e;
             }
         }
-        commands.create(index, CreateOptions.<String, String>builder().prefix(config.getStore().getKeyspace() + config.getKeySeparator()).build(), Field.tag(STORE_ID).sortable(true).build(), Field.text("description").build(),
-                Field.tag("market").sortable(true).build(), Field.tag("parent").sortable(true).build(),
-                Field.text("address").build(), Field.text("city").sortable(true).build(),
-                Field.tag("country").sortable(true).build(), Field.tag("inventoryAvailableToSell").sortable(true).build(),
-                Field.tag("isDefault").sortable(true).build(), Field.tag("preferred").sortable(true).build(),
-                Field.numeric("latitude").sortable(true).build(), Field.geo(LOCATION).build(),
-                Field.numeric("longitude").sortable(true).build(), Field.tag("rollupInventory").sortable(true).build(),
-                Field.tag("state").sortable(true).build(), Field.tag("type").sortable(true).build(),
-                Field.tag("postalCode").sortable(true).build());
+        commands.create(index, CreateOptions.<String, String>builder().prefix(config.getStore().getKeyspace() + config.getKeySeparator()).build(), Field.tag(STORE_ID).sortable().build(), Field.text("description").build(),
+                Field.tag("market").sortable().build(), Field.tag("parent").sortable().build(),
+                Field.text("address").build(), Field.text("city").sortable().build(),
+                Field.tag("country").sortable().build(), Field.tag("inventoryAvailableToSell").sortable().build(),
+                Field.tag("isDefault").sortable().build(), Field.tag("preferred").sortable().build(),
+                Field.numeric("latitude").sortable().build(), Field.geo(LOCATION).build(),
+                Field.numeric("longitude").sortable().build(), Field.tag("rollupInventory").sortable().build(),
+                Field.tag("state").sortable().build(), Field.tag("type").sortable().build(),
+                Field.tag("postalCode").sortable().build());
         RiotFile file = new RiotFile();
         configure(file.getRedisOptions());
         FileImportCommand command = new FileImportCommand();
         command.setApp(file);
         command.setFiles(Collections.singletonList(config.getStore().getUrl()));
         command.getOptions().setHeader(true);
-        ProcessorOptions processorOptions = new ProcessorOptions();
+        MapProcessorOptions processorOptions = new MapProcessorOptions();
         SpelExpressionParser parser = new SpelExpressionParser();
         Map<String, Expression> fields = new LinkedHashMap<>();
         fields.put(LOCATION, parser.parseExpression("#geo(longitude,latitude)"));
@@ -136,42 +129,41 @@ public class DataLoader implements InitializingBean {
         command.execute();
     }
 
-    @SuppressWarnings("unchecked")
     private void loadProducts() throws Exception {
         RediSearchCommands<String, String> commands = connection.sync();
         String index = config.getProduct().getIndex();
         try {
-            IndexInfo<String, String> info = RediSearchUtils.getInfo(commands.indexInfo(index));
+            IndexInfo info = Utils.indexInfo(commands.indexInfo(index));
             if (info.getNumDocs() >= config.getProduct().getLoad().getCount()) {
                 log.info("Found {} products - skipping load", Math.round(info.getNumDocs()));
                 return;
             }
-            commands.dropIndex(index);
+            commands.dropindex(index);
         } catch (RedisCommandExecutionException e) {
             if (!e.getMessage().equals("Unknown Index name")) {
                 throw e;
             }
         }
-        commands.create(index, CreateOptions.<String, String>builder().prefix(config.getProduct().getKeyspace() + config.getKeySeparator()).build(), Field.tag(PRODUCT_ID).sortable(true).build(),
-                Field.text(PRODUCT_NAME).sortable(true).build(),
+        commands.create(index, CreateOptions.<String, String>builder().prefix(config.getProduct().getKeyspace() + config.getKeySeparator()).build(), Field.tag(PRODUCT_ID).sortable().build(),
+                Field.text(PRODUCT_NAME).sortable().build(),
                 Field.text(PRODUCT_DESCRIPTION).matcher(Field.Text.PhoneticMatcher.English).build(),
                 Field.tag(PRODUCT_LABEL).build(),
-                Field.tag(CATEGORY_ID).sortable(true).build(),
+                Field.tag(CATEGORY_ID).sortable().build(),
                 Field.text(CATEGORY_NAME).build(),
-                Field.tag(STYLE_ID).sortable(true).build(),
+                Field.tag(STYLE_ID).sortable().build(),
                 Field.text(STYLE_NAME).build(),
-                Field.tag(BREWERY_ID).sortable(true).build(),
+                Field.tag(BREWERY_ID).sortable().build(),
                 Field.text(BREWERY_NAME).build(),
-                Field.text(FOOD_PAIRINGS).sortable(true).build(),
-                Field.tag("isOrganic").sortable(true).build(),
-                Field.numeric("abv").sortable(true).build(),
-                Field.numeric("ibu").sortable(true).build());
+                Field.text(FOOD_PAIRINGS).sortable().build(),
+                Field.tag("isOrganic").sortable().build(),
+                Field.numeric("abv").sortable().build(),
+                Field.numeric("ibu").sortable().build());
         RiotFile file = new RiotFile();
         configure(file.getRedisOptions());
         FileImportCommand command = new FileImportCommand();
         command.setApp(file);
         command.setFiles(Collections.singletonList(config.getProduct().getUrl()));
-        ProcessorOptions processorOptions = new ProcessorOptions();
+        MapProcessorOptions processorOptions = new MapProcessorOptions();
         SpelExpressionParser parser = new SpelExpressionParser();
         Map<String, Expression> fields = new LinkedHashMap<>();
         fields.put(PRODUCT_ID, parser.parseExpression("id"));
@@ -210,8 +202,8 @@ public class DataLoader implements InitializingBean {
         RediSearchCommands<String, String> commands = connection.sync();
         String index = config.getProduct().getIndex();
         AggregateResults<String> results = commands.aggregate(index, "*",
-                AggregateOptions.builder().load(CATEGORY_NAME)
-                        .operation(GroupBy.properties(CATEGORY_ID, CATEGORY_NAME)
+                AggregateOptions.<String, String>builder().load(CATEGORY_NAME)
+                        .operation(GroupBy.<String, String>properties(CATEGORY_ID, CATEGORY_NAME)
                                 .reducer(CountDistinct.property(PRODUCT_ID).as(COUNT).build()).build())
                         .build());
         this.categories = results.stream()
@@ -222,8 +214,8 @@ public class DataLoader implements InitializingBean {
         this.categories.forEach(category -> {
             AggregateResults<String> styleResults = commands.aggregate(index,
                     config.tag(CATEGORY_ID, category.getId()),
-                    AggregateOptions.builder().load(STYLE_NAME)
-                            .operation(GroupBy.properties(STYLE_ID, STYLE_NAME)
+                    AggregateOptions.<String, String>builder().load(STYLE_NAME)
+                            .operation(GroupBy.<String, String>properties(STYLE_ID, STYLE_NAME)
                                     .reducer(CountDistinct.property(PRODUCT_ID).as(COUNT).build()).build())
                             .build());
             List<Style> styleList = styleResults.stream()
@@ -247,8 +239,8 @@ public class DataLoader implements InitializingBean {
         }
         log.info("Loading breweries");
         AggregateResults<String> results = commands.aggregate(config.getProduct().getIndex(), "*",
-                AggregateOptions.builder().load(BREWERY_NAME).load(BREWERY_ICON)
-                        .operation(GroupBy.properties(BREWERY_ID, BREWERY_NAME, BREWERY_ICON)
+                AggregateOptions.<String, String>builder().load(BREWERY_NAME).load(BREWERY_ICON)
+                        .operation(GroupBy.<String, String>properties(BREWERY_ID, BREWERY_NAME, BREWERY_ICON)
                                 .reducer(CountDistinct.property(PRODUCT_ID).as(COUNT).build()).build())
                         .build());
         ObjectMapper mapper = new ObjectMapper();
@@ -267,7 +259,7 @@ public class DataLoader implements InitializingBean {
                 return;
             }
             double count = Double.parseDouble((String) r.get(COUNT));
-            commands.sugadd(config.getProduct().getBrewery().getIndex(), breweryName, count, SugaddOptions.<String>builder().payload(payload).build());
+            commands.sugadd(config.getProduct().getBrewery().getIndex(), breweryName, count, payload);
         });
         log.info("Loaded {} breweries", results.size());
     }
@@ -277,10 +269,10 @@ public class DataLoader implements InitializingBean {
         sync.del(config.getProduct().getFoodPairings().getIndex());
         log.info("Loading food pairings");
         String index = config.getProduct().getIndex();
-        AggregateResults<String> results = sync.aggregate(index, "*", AggregateOptions.builder()
-                .operation(GroupBy.property(FOOD_PAIRINGS).reducer(CountDistinct.property(PRODUCT_ID).as(COUNT).build()).build())
-                .operation(SortBy.property(SortBy.Property.name(COUNT).order(Order.DESC)).build())
-                .operation(Limit.offset(0).num(config.getProduct().getFoodPairings().getLimit())).build());
+        AggregateResults<String> results = sync.aggregate(index, "*", AggregateOptions.<String, String>builder()
+                .operation(GroupBy.<String, String>property(FOOD_PAIRINGS).reducer(CountDistinct.property(PRODUCT_ID).as(COUNT).build()).build())
+                .operation(SortBy.<String, String>property(SortBy.Property.name(COUNT).order(Order.DESC)).build())
+                .operation(Limit.<String, String>offset(0).num(config.getProduct().getFoodPairings().getLimit())).build());
         try (StatefulRedisModulesConnection<String, String> connection = pool.borrowObject()) {
             RedisModulesAsyncCommands<String, String> async = connection.async();
             async.setAutoFlushCommands(false);
@@ -291,7 +283,7 @@ public class DataLoader implements InitializingBean {
                     return;
                 }
                 Arrays.stream(foodPairings.split("[,\\n]")).map(this::clean).filter(s -> s.split(" ").length <= 2)
-                        .forEach(food -> futures.add(async.sugadd(config.getProduct().getFoodPairings().getIndex(), food, 1.0, SugaddOptions.<String>builder().increment(true).build())));
+                        .forEach(food -> futures.add(async.sugaddIncr(config.getProduct().getFoodPairings().getIndex(), food, 1.0)));
             });
             async.flushCommands();
             LettuceFutures.awaitAll(connection.getTimeout(), futures.toArray(new RedisFuture[0]));

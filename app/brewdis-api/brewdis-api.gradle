@@ -5,12 +5,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
-    implementation 'com.redislabs:spring-redis-modules:1.3.2'
+    implementation group: 'com.redis', name: 'spring-lettucemod', version: lettucemodVersion
     implementation 'org.springframework.kafka:spring-kafka'
-    implementation ('com.redislabs:riot-core:2.11.5') {
+    implementation (group: 'com.redis', name: 'riot-core', version: riotVersion) {
         exclude group: 'org.slf4j', module: 'slf4j-jdk14'
     }
-    implementation ('com.redislabs:riot-file:2.11.5') {
+    implementation (group: 'com.redis', name: 'riot-file', version: riotVersion) {
         exclude group: 'org.slf4j', module: 'slf4j-jdk14'
     }
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {

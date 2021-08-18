@@ -5,16 +5,16 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath "com.redislabs.gradle:redislabs-parentbuild:$redislabsBuildVersion"
         classpath "org.kordamp.gradle:java-project-gradle-plugin:$kordampPluginVersion"
-        classpath "org.kordamp.gradle:guide-gradle-plugin:$kordampPluginVersion"
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.5.3"
-        classpath "io.spring.gradle:dependency-management-plugin:1.0.11.RELEASE"
+        classpath "org.kordamp.gradle:kordamp-parentbuild:$kordampBuildVersion"
+        classpath "io.freefair.gradle:lombok-plugin:$lombokPluginVersion"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:$bootPluginVersion"
+        classpath "io.spring.gradle:dependency-management-plugin:$dependencyPluginVersion"
         classpath "com.github.node-gradle:gradle-node-plugin:3.0.1"
     }
 }
 
-apply plugin: 'com.redislabs.gradle.redislabs-parentbuild'
+apply plugin: 'org.kordamp.gradle.kordamp-parentbuild'
 
 rootProject.name = 'brewdis-kafka'
 
@@ -36,6 +36,7 @@ projects {
             id 'java-library'
             id 'org.springframework.boot'
             id 'io.spring.dependency-management'
+            id 'io.freefair.lombok'
         }
     }
 }
@@ -44,7 +45,7 @@ enforce {
     mergeStrategy = 'append'
 
     rule(enforcer.rules.ForceDependencies) { r ->
-        r.dependencies.addAll "com.redislabs:mesclun:1.3.2",
+        r.dependencies.addAll "com.redis:lettucemod:$lettucemodVersion",
                 "com.google.guava:guava:30.0-android",
                 "com.google.errorprone:error_prone_annotations:2.4.0",
                 "com.google.http-client:google-http-client:$googleHttpVersion",

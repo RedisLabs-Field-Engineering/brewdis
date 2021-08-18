@@ -1,6 +1,6 @@
 package com.redislabs.demo.brewdis.web;
 
-import com.redislabs.mesclun.search.SearchResults;
+import com.redis.lettucemod.api.search.SearchResults;
 import lombok.Data;
 
 @Data

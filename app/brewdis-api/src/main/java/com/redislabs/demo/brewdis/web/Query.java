@@ -1,6 +1,5 @@
 package com.redislabs.demo.brewdis.web;
 
-import com.redislabs.mesclun.search.SearchResults;
 import lombok.Data;
 
 @Data

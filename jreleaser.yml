@@ -2,27 +2,38 @@ project:
   name: brewdis-kafka
   description: Brewdis Kafka Demo
   longDescription: Real-time inventory demo using Redis and Kafka
-  website: https://github.com/redis-developer/brewdis-kafka
+  website: https://github.com/redis-field-engineering/brewdis-kafka
   authors:
     - Julien Ruaux
   license: Apache-2.0
   java:
-    groupId: com.redislabs
+    groupId: com.redis
     version: 8
     multiProject: true
   extraProperties:
-    inceptionYear: 2020
+    inceptionYear: 2021
+
 
 release:
   github:
-    branch: master
-    username: jruaux
     overwrite: true
+    sign: true
     changelog:
-      sort: DESC
       formatted: ALWAYS
       format: '- {{commitShortHash}} {{commitTitle}}'
+      contributors:
+        format: '- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}'
       labelers:
+        - label: 'merge_pull'
+          title: 'Merge pull'
+        - label: 'merge_branch'
+          title: 'Merge branch'
+        - label: 'translation'
+          title: '[translation]'
+        - label: 'task'
+          title: '[chore]'
+        - label: 'dependencies'
+          title: '[deps]'
         - label: 'feature'
           title: 'Resolves #'
           body: 'Resolves #'
@@ -32,11 +43,11 @@ release:
         - label: 'issue'
           title: 'Relates to #'
           body: 'Relates to #'
-        - label: 'task'
-          title: '[chore]'
-        - label: 'dependencies'
-          title: '[deps]'
       categories:
+        - title: 'Merge'
+          labels:
+            - 'merge_pull'
+            - 'merge_branch'
         - title: '🚀 Features'
           labels:
             - 'feature'
@@ -46,20 +57,36 @@ release:
         - title: '🧰 Tasks'
           labels:
             - 'task'
-        - title: '⚙️ Dependencies'
+        - title: '🌐 Translation'
+          labels:
+            - 'translation'
+        - title: '⚙️  Dependencies'
           labels:
             - 'dependencies'
+      hide:
+        categories:
+          - 'Merge'
+        contributors:
+          - 'GitHub'
       replacers:
         - search: '\[chore\] '
-          replace: ''
         - search: '\[deps\] '
-          replace: ''
+        - search: '\[translation\] '
+
+signing:
+  active: always
+  armored: true
+  files: false
+
+checksum:
+  files: false
 
 distributions:
   brewdis:
     type: SINGLE_JAR
     artifacts:
       - path: app/brewdis-api/build/libs/brewdis-api-{{projectVersion}}.jar
+        transform: '{{distributionName}}/{{distributionName}}-{{projectEffectiveVersion}}.jar'
     docker:
       active: never
       registries:
