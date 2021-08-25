@@ -21,6 +21,14 @@ docker-compose up
 
 Access the demo at http://localhost[]
 
+== Architecture
+
+{empty} +
+
+image::app/brewdis-kafka-architecture.png[Brewdis Kafka]
+
+{empty} +
+
 == Demo Steps
 
 === Presentation
@@ -91,11 +99,3 @@ Here are the most common configuration options for this demo:
 - `stomp.protocol`: Websocket protocol (default: `ws`). Use `wss` for secure websockets
 - `inventory.generator.rate`: duration in millis the generator should sleep between inventory updates (default: `100`)
 - `availability-radius`: radius to find in-store availability (default: `25 mi`)
-
-== Architecture
-
-{empty} +
-
-image::app/brewdis-kafka-architecture.png[Brewdis Kafka]
-
-{empty} +
