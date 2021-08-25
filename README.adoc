@@ -96,6 +96,6 @@ Here are the most common configuration options for this demo:
 
 {empty} +
 
-image::app/architecture.svg[Brewdis]
+image::app/brewdis-kafka-architecture.png[Brewdis Kafka]
 
 {empty} +
