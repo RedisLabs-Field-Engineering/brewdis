@@ -13,6 +13,7 @@ Fork of https://github.com/redis-developer/brewdis[Brewdis] that uses the https:
 
 [source,shell]
 ----
+git clone https://github.com/RedisLabs-Field-Engineering/redis-enterprise-kafka.git
 git clone https://github.com/RedisLabs-Field-Engineering/brewdis-kafka.git
 cd brewdis
 docker-compose up
