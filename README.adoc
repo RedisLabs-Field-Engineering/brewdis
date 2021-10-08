@@ -9,6 +9,14 @@ image:https://github.com/{project-owner}/{project-name}/actions/workflows/early-
 
 Fork of https://github.com/redis-developer/brewdis[Brewdis] that uses the https://github.com/RedisLabs-Field-Engineering/redis-enterprise-kafka[Redis Enterprise Kafka Connector] to consume inventory demand events from Kafka and publish inventory updates to Kafka.
 
+== Architecture
+
+{empty} +
+
+image::app/brewdis-kafka-architecture.png[Brewdis Kafka]
+
+{empty} +
+
 == Run the demo
 
 [source,shell]
