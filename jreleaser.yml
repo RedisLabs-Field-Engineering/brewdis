@@ -17,7 +17,6 @@ project:
 release:
   github:
     overwrite: true
-    sign: true
     changelog:
       formatted: ALWAYS
       format: '- {{commitShortHash}} {{commitTitle}}'
@@ -72,11 +71,6 @@ release:
         - search: '\[chore\] '
         - search: '\[deps\] '
         - search: '\[translation\] '
-
-signing:
-  active: always
-  armored: true
-  files: false
 
 checksum:
   files: false
