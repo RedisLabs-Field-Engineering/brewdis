@@ -72,6 +72,9 @@ release:
         - search: '\[deps\] '
         - search: '\[translation\] '
 
+signing:
+  active: never
+
 checksum:
   files: false
 

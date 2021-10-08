@@ -27,6 +27,11 @@ config {
                 roles = ['developer', 'author']
             }
         }
+        publishing {
+            signing {
+                enabled = false
+            }
+        }
     }
     licensing {
         enabled = false
