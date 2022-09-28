@@ -70,4 +70,16 @@ subprojects {
             description = project.project_description
         }
     }
+    
+    configurations.all {
+		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+			if (details.requested.name == 'lettuce-core' ) {
+				details.useVersion lettuceVersion
+			}
+		}
+	}
+    
+    sourceCompatibility = 8
+    targetCompatibility = 8
+    
 }

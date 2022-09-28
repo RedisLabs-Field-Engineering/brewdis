@@ -8,17 +8,9 @@ if lsof -Pi :6379 -sTCP:LISTEN -t >/dev/null ; then
 fi
 )
 
-echo "Building the Redis Enterprise Kafka Connector and starting docker"
+echo "Building the Redis Kafka Connector and starting docker"
 (
-cd ../redis-enterprise-kafka
-./mvnw clean package -DskipTests
-find ./target/components/packages -type d -name "redis-redis-enterprise-kafka-5*" -mindepth 2 -maxdepth 2 -exec mv {} ./target/components/packages/redis-enterprise-kafka \;
-)
-
-echo "Starting docker ."
-(
-cd ../redis-enterprise-kafka/docker
-docker-compose up -d --build
+docker-compose --project-directory ../redis-kafka-connect up -d --build
 )
 
 function clean_up {
@@ -26,7 +18,7 @@ function clean_up {
     curl --output /dev/null -X DELETE http://localhost:8083/connectors/inventory-updates-sink || true
     curl --output /dev/null -X DELETE http://localhost:8083/connectors/inventory-stream-source || true
     (
-    cd ../redis-enterprise-kafka/docker
+    cd ../redis-kafka-connect
     docker-compose down
     )
     if [ -z "$1" ]
@@ -66,7 +58,7 @@ trap clean_up EXIT
 
 echo -e "\nCreating topic 'inventory-updates':"
 (
-cd ../redis-enterprise-kafka/docker
+cd ../redis-kafka-connect
 docker-compose exec broker /usr/bin/kafka-topics --create --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1 --topic inventory-updates
 )
 
@@ -75,11 +67,11 @@ echo -e "\nRegistering schema on topic 'inventory-updates':"
 curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data '{"schema": "{\"type\":\"record\",\"name\":\"Payment\",\"namespace\":\"my.examples\",\"fields\":[{\"name\":\"store\",\"type\":\"string\"},{\"name\":\"sku\",\"type\":\"string\"},{\"name\":\"allocated\",\"type\":\"string\"}]}"}' http://localhost:8081/subjects/inventory-updates-value/versions -w "\n"
 
 sleep 2
-echo -e "\nAdding Redis Enteprise Kafka Sink Connector for the 'inventory-updates' topic into the 'inventory-updates' stream:"
+echo -e "\nAdding Redis Kafka Sink Connector for the 'inventory-updates' topic into the 'inventory-updates' stream:"
 curl -X POST -H "Content-Type: application/json" --data '
   {"name": "inventory-updates-sink",
    "config": {
-     "connector.class":"com.redis.kafka.connect.RedisEnterpriseSinkConnector",
+     "connector.class":"com.redis.kafka.connect.RedisSinkConnector",
      "tasks.max":"1",
      "topics":"inventory-updates",
      "redis.uri":"redis://redis:6379",
@@ -89,12 +81,12 @@ curl -X POST -H "Content-Type: application/json" --data '
 }}' http://localhost:8083/connectors -w "\n"
 
 sleep 2
-echo -e "\nAdding Redis Enterprise Kafka Source Connector for the 'inventory-stream' stream:"
+echo -e "\nAdding Redis Kafka Source Connector for the 'inventory-stream' stream:"
 curl -X POST -H "Content-Type: application/json" --data '
   {"name": "inventory-stream-source",
    "config": {
      "tasks.max":"1",
-     "connector.class":"com.redis.kafka.connect.RedisEnterpriseSourceConnector",
+     "connector.class":"com.redis.kafka.connect.RedisSourceConnector",
      "redis.uri":"redis://redis:6379",
      "redis.stream.name":"inventory-stream",
      "topic": "inventory-stream"

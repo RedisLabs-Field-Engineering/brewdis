@@ -3,11 +3,11 @@
 :project-owner:   redis-field-engineering
 :project-name:    brewdis-kafka
 :project-group:   com.redis
-:project-version: 0.1.0
+:project-version: 0.2.0
 
 image:https://github.com/{project-owner}/{project-name}/actions/workflows/early-access.yml/badge.svg["Build Status", link="https://github.com/{project-owner}/{project-name}/actions/workflows/early-access.yml"]
 
-Fork of https://github.com/redis-developer/brewdis[Brewdis] that uses the https://github.com/RedisLabs-Field-Engineering/redis-enterprise-kafka[Redis Enterprise Kafka Connector] to consume inventory demand events from Kafka and publish inventory updates to Kafka.
+Fork of https://github.com/redis-developer/brewdis[Brewdis] that uses the https://github.com/redis-field-engineering/redis-kafka-connect[Redis Kafka Connector] to consume inventory demand events from Kafka and publish inventory updates to Kafka.
 
 == Architecture
 
@@ -21,8 +21,8 @@ image::app/brewdis-kafka-architecture.png[Brewdis Kafka]
 
 [source,shell]
 ----
-git clone https://github.com/RedisLabs-Field-Engineering/redis-enterprise-kafka.git
-git clone https://github.com/RedisLabs-Field-Engineering/brewdis-kafka.git
+git clone https://github.com/redis-field-engineering/redis-kafka-connect.git
+git clone https://github.com/redis-field-engineering/brewdis-kafka.git
 cd brewdis-kafka
 ./run.sh
 ----

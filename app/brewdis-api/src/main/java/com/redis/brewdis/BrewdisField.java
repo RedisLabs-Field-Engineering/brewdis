@@ -1,4 +1,4 @@
-package com.redislabs.demo.brewdis;
+package com.redis.brewdis;
 
 public class BrewdisField {
 

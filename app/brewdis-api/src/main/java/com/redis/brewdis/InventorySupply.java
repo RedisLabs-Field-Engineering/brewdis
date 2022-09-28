@@ -1,9 +1,9 @@
-package com.redislabs.demo.brewdis;
+package com.redis.brewdis;
 
-import static com.redislabs.demo.brewdis.BrewdisField.AVAILABLE_TO_PROMISE;
-import static com.redislabs.demo.brewdis.BrewdisField.ON_HAND;
-import static com.redislabs.demo.brewdis.BrewdisField.PRODUCT_ID;
-import static com.redislabs.demo.brewdis.BrewdisField.STORE_ID;
+import static com.redis.brewdis.BrewdisField.AVAILABLE_TO_PROMISE;
+import static com.redis.brewdis.BrewdisField.ON_HAND;
+import static com.redis.brewdis.BrewdisField.PRODUCT_ID;
+import static com.redis.brewdis.BrewdisField.STORE_ID;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -15,6 +15,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +29,11 @@ import org.springframework.data.redis.stream.StreamMessageListenerContainer.Stre
 import org.springframework.data.redis.stream.Subscription;
 import org.springframework.stereotype.Component;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Component
-@Slf4j
 public class InventorySupply
 		implements InitializingBean, DisposableBean, StreamListener<String, MapRecord<String, String, String>> {
+
+	private final Logger log = LoggerFactory.getLogger(InventorySupply.class);
 
 	@Autowired
 	private Config config;
@@ -92,7 +93,7 @@ public class InventorySupply
 				@Override
 				public void run() {
 					int delta = restockOnHands.nextInt();
-					Map<String,String> message = new HashMap<>();
+					Map<String, String> message = new HashMap<>();
 					message.put(STORE_ID, store);
 					message.put(PRODUCT_ID, sku);
 					message.put(ON_HAND, String.valueOf(delta));

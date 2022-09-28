@@ -2,7 +2,8 @@ project:
   name: brewdis-kafka
   description: Brewdis Kafka Demo
   longDescription: Real-time inventory demo using Redis and Kafka
-  website: https://github.com/redis-field-engineering/brewdis-kafka
+  links:
+    homepage: https://github.com/redis-field-engineering/brewdis-kafka
   authors:
     - Julien Ruaux
   license: Apache-2.0
@@ -10,73 +11,42 @@ project:
     groupId: com.redis
     version: 8
     multiProject: true
-  extraProperties:
-    inceptionYear: 2021
-
+  inceptionYear: 2021
+  tags:
+    - 'redis'
+    - 'real-time'    
+    - 'inventory'
+    - 'kafka'
+    - 'search'
 
 release:
   github:
     overwrite: true
     changelog:
       formatted: ALWAYS
+      preset: conventional-commits
       format: '- {{commitShortHash}} {{commitTitle}}'
       contributors:
         enabled: false
       labelers:
-        - label: 'merge_pull'
-          title: 'Merge pull'
-        - label: 'merge_branch'
-          title: 'Merge branch'
-        - label: 'translation'
-          title: '[translation]'
-        - label: 'task'
-          title: '[chore]'
         - label: 'dependencies'
-          title: '[deps]'
-        - label: 'feature'
-          title: 'Resolves #'
-          body: 'Resolves #'
-        - label: 'issue'
-          title: 'Fixes #'
-          body: 'Fixes #'
-        - label: 'issue'
-          title: 'Relates to #'
-          body: 'Relates to #'
+          title: 'regex:^(?:deps(?:\(.*\))?!?):\s.*'
+          order: 130
       categories:
         - title: 'Merge'
           labels:
             - 'merge_pull'
             - 'merge_branch'
-        - title: '🚀 Features'
-          labels:
-            - 'feature'
-        - title: '✅ Issues'
-          labels:
-            - 'issue'
-        - title: '🧰 Tasks'
-          labels:
-            - 'task'
-        - title: '🌐 Translation'
-          labels:
-            - 'translation'
         - title: '⚙️  Dependencies'
+          key: 'dependencies'
+          order: 80
           labels:
             - 'dependencies'
       hide:
         categories:
           - 'Merge'
-        contributors:
-          - 'GitHub'
       replacers:
-        - search: '\[chore\] '
-        - search: '\[deps\] '
-        - search: '\[translation\] '
-
-signing:
-  active: never
-
-checksum:
-  files: false
+        - search: 'deps: '
 
 distributions:
   brewdis:
