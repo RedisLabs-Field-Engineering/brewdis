@@ -57,7 +57,7 @@ trap clean_up EXIT
 
 echo -e "\nCreating topic 'inventory-updates':"
 (
-docker-compose exec broker /usr/bin/kafka-topics --create --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1 --topic inventory-updates
+docker-compose exec broker /usr/bin/kafka-topics --create --if-not-exists --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1 --topic inventory-updates
 )
 
 sleep 2
@@ -89,10 +89,6 @@ curl -X POST -H "Content-Type: application/json" --data '
      "redis.stream.name":"inventory-stream",
      "topic": "inventory-stream"
 }}' http://localhost:8083/connectors -w "\n"
-
-sleep 2
-echo -e "\nStarting Brewdis:"
-./gradlew bootRun
 
 echo -e '''
 
