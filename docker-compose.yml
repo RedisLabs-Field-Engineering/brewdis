@@ -163,6 +163,7 @@ services:
     environment:
       SPRING_REDIS_HOST: redis
       STOMP_PORT: 80
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: 'broker:29092'
 
   trino:
     image: jruaux/trino-redisearch
