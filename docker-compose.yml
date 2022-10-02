@@ -152,9 +152,7 @@ services:
       - 6379:6379
 
   brewdis:
-    build:
-      context: ./
-      dockerfile: Dockerfile
+    image: jruaux/brewdis-kafka
     restart: always
     ports:
       - "80:8080"
