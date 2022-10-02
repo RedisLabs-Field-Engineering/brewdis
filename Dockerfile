@@ -1,10 +1,10 @@
-FROM openjdk:13-jdk-slim AS build
+FROM openjdk:17-jdk-slim AS build
 WORKDIR /app
 COPY . /app
 RUN ./gradlew build --no-daemon
 
 #### Stage 2: A minimal docker image with command to run the app 
-FROM openjdk:13-jdk-slim
+FROM openjdk:17-jdk-slim
 
 EXPOSE 8080
 

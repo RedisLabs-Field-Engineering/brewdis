@@ -8,9 +8,9 @@ if lsof -Pi :6379 -sTCP:LISTEN -t >/dev/null ; then
 fi
 )
 
-echo "Building the Redis Kafka Connector and starting docker"
+echo "Starting docker"
 (
-docker-compose --project-directory ../redis-kafka-connect up -d --build
+docker-compose up -d --build
 )
 
 function clean_up {
@@ -18,7 +18,6 @@ function clean_up {
     curl --output /dev/null -X DELETE http://localhost:8083/connectors/inventory-updates-sink || true
     curl --output /dev/null -X DELETE http://localhost:8083/connectors/inventory-stream-source || true
     (
-    cd ../redis-kafka-connect
     docker-compose down
     )
     if [ -z "$1" ]
@@ -58,7 +57,6 @@ trap clean_up EXIT
 
 echo -e "\nCreating topic 'inventory-updates':"
 (
-cd ../redis-kafka-connect
 docker-compose exec broker /usr/bin/kafka-topics --create --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1 --topic inventory-updates
 )
 
