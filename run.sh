@@ -62,7 +62,7 @@ docker-compose exec broker /usr/bin/kafka-topics --create --if-not-exists --boot
 
 sleep 2
 echo -e "\nRegistering schema on topic 'inventory-updates':"
-curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data '{"schema": "{\"type\":\"record\",\"name\":\"Payment\",\"namespace\":\"my.examples\",\"fields\":[{\"name\":\"store\",\"type\":\"string\"},{\"name\":\"sku\",\"type\":\"string\"},{\"name\":\"allocated\",\"type\":\"string\"}]}"}' http://localhost:8081/subjects/inventory-updates-value/versions -w "\n"
+curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data '{"schema": "{\"type\":\"record\",\"name\":\"Inventory\",\"namespace\":\"com.redis\",\"fields\":[{\"name\":\"store\",\"type\":\"string\"},{\"name\":\"sku\",\"type\":\"string\"},{\"name\":\"allocated\",\"type\":\"string\"}]}"}' http://localhost:8081/subjects/inventory-updates-value/versions -w "\n"
 
 sleep 2
 echo -e "\nAdding Redis Kafka Sink Connector for the 'inventory-updates' topic into the 'inventory-updates' stream:"

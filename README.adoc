@@ -7,25 +7,59 @@
 
 image:https://github.com/{project-owner}/{project-name}/actions/workflows/early-access.yml/badge.svg["Build Status", link="https://github.com/{project-owner}/{project-name}/actions/workflows/early-access.yml"]
 
-Fork of https://github.com/redis-developer/brewdis[Brewdis] that uses the https://github.com/redis-field-engineering/redis-kafka-connect[Redis Kafka Connector] to consume inventory demand events from Kafka and publish inventory updates to Kafka.
-
-== Architecture
-
-{empty} +
-
-image::app/brewdis-kafka-architecture.png[Brewdis Kafka]
-
-{empty} +
+Real-Time Inventory demo using Redis.
 
 == Run the demo
 
 [source,shell]
 ----
-git clone https://github.com/redis-field-engineering/redis-kafka-connect.git
 git clone https://github.com/redis-field-engineering/brewdis-kafka.git
 cd brewdis-kafka
 ./run.sh
 ----
 
-* Confluent Center: http://localhost:9021
-* Brewdis UI: http://localhost:8080
+=== Confluent Center
+
+http://localhost:9021
+
+=== Brewdis UI
+
+http://localhost
+
+=== Tableau
+
+See setup instructions at https://github.com/redis-field-engineering/redis-sql
+
+== Architecture
+
+image::app/brewdis-kafka-architecture.png[Brewdis Kafka]
+
+Brewdis consumes inventory demand events from Kafka and publishes inventory updates to Kafka using the Redis Kafka Connector.
+
+Inventory state is maintained in real-time by Redis in the `inventory` index.
+
+Product catalog and inventory can be queried in RediSearch directly or in Tableau via the https://github.com/redis-field-engineering/redis-sql[Trino integration].
+
+== Resources
+
+=== RediSearch
+
+Full-text search and secondary-indexing engine based on Redis.
+
+https://redis.com/modules/redis-search/
+
+=== Redis Kafka Connect
+
+Kafka Connector (Source and Sink) for Redis.
+
+https://github.com/redis-field-engineering/redis-kafka-connect
+
+
+=== Redis SQL
+
+Trino Plugin for RediSearch
+
+https://github.com/redis-field-engineering/redis-sql
+
+
+
