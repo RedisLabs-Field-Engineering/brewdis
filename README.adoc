@@ -1,7 +1,7 @@
 = Brewdis
 :linkattrs:
 :project-owner:   redis-field-engineering
-:project-name:    brewdis-kafka
+:project-name:    brewdis
 :project-group:   com.redis
 :project-version: 0.2.0
 
@@ -13,8 +13,8 @@ Real-Time Inventory demo using Redis.
 
 [source,shell]
 ----
-git clone https://github.com/redis-field-engineering/brewdis-kafka.git
-cd brewdis-kafka
+git clone https://github.com/redis-field-engineering/brewdis.git
+cd brewdis
 ./run.sh
 ----
 
@@ -32,7 +32,7 @@ See setup instructions at https://github.com/redis-field-engineering/redis-sql
 
 == Architecture
 
-image::app/brewdis-kafka-architecture.png[Brewdis Kafka]
+image::app/brewdis-architecture.png[Brewdis]
 
 Brewdis consumes inventory demand events from Kafka and publishes inventory updates to Kafka using the Redis Kafka Connector.
 

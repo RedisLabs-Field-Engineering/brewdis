@@ -54,7 +54,7 @@ services:
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
 
   connect:
-    image: jruaux/redis-kafka-connect
+    image: fieldengineering/redis-kafka-connect
     hostname: connect
     container_name: connect
     depends_on:
@@ -152,7 +152,7 @@ services:
       - 6379:6379
 
   brewdis:
-    image: jruaux/brewdis-kafka
+    image: fieldengineering/redis-demo-brewdis
     restart: always
     ports:
       - "80:8080"
@@ -164,7 +164,7 @@ services:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: 'broker:29092'
 
   trino:
-    image: jruaux/trino-redisearch
+    image: fieldengineering/redis-sql
     hostname: trino
     container_name: trino
     ports:

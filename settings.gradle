@@ -14,7 +14,7 @@ buildscript {
 
 apply plugin: 'org.kordamp.gradle.kordamp-parentbuild'
 
-rootProject.name = 'brewdis-kafka'
+rootProject.name = 'brewdis'
 
 projects {
     directories = ['app']

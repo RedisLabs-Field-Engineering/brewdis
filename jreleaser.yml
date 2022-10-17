@@ -1,15 +1,15 @@
 project:
-  name: brewdis-kafka
-  description: Brewdis Kafka Demo
+  name: brewdis
+  description: Brewdis Demo
   longDescription: Real-time inventory demo using Redis and Kafka
   links:
-    homepage: https://github.com/redis-field-engineering/brewdis-kafka
+    homepage: https://github.com/redis-field-engineering/brewdis
   authors:
     - Julien Ruaux
   license: Apache-2.0
   java:
     groupId: com.redis
-    version: 8
+    version: 17
     multiProject: true
   inceptionYear: 2021
   tags:
@@ -55,10 +55,15 @@ distributions:
       - path: app/brewdis-api/build/libs/brewdis-api-{{projectVersion}}.jar
         transform: '{{distributionName}}/{{distributionName}}-{{projectEffectiveVersion}}.jar'
     docker:
-      active: never
+      active: always
+      repository:
+        active: never
       registries:
         - serverName: DEFAULT
-          username: jruaux
+          repositoryName: fieldengineering
+      imageNames:
+        - 'fieldengineering/{{distributionName}}:{{tagName}}'
+        - 'fieldengineering/{{distributionName}}:latest'
       labels:
         'org.opencontainers.image.title': 'brewdis'
 
