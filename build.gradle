@@ -1,6 +1,6 @@
 config {
     info {
-        description = 'Brewdis Kafka Demo'
+        description = 'Brewdis Demo'
         inceptionYear = '2020'
         vendor = 'Redis'
         tags = ['redis', 'redisearch', 'kafka', 'connect', 'inventory', 'real-time', 'retail']

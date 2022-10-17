@@ -53,7 +53,9 @@ distributions:
     type: SINGLE_JAR
     artifacts:
       - path: app/brewdis-api/build/libs/brewdis-api-{{projectVersion}}.jar
-        transform: '{{distributionName}}/{{distributionName}}-{{projectEffectiveVersion}}.jar'
+        transform: '{{distributionName}}-{{projectEffectiveVersion}}.jar'
+    executable:
+      name: 'brewdis-launcher'
     docker:
       active: always
       repository:
@@ -62,8 +64,8 @@ distributions:
         - serverName: DEFAULT
           repositoryName: fieldengineering
       imageNames:
-        - 'fieldengineering/{{distributionName}}:{{tagName}}'
-        - 'fieldengineering/{{distributionName}}:latest'
+        - 'fieldengineering/redis-demo-{{distributionName}}:{{tagName}}'
+        - 'fieldengineering/redis-demo-{{distributionName}}:latest'
       labels:
         'org.opencontainers.image.title': 'brewdis'
 
