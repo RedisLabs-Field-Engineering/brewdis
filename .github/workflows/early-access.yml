@@ -11,6 +11,7 @@ jobs:
     - name: Release
       uses: redis-field-engineering/redis-release-action@v1
       with:
+        publish-to-sonatype: false
         gpg-key-id: ${{ secrets.GPG_KEY_ID }}
         gpg-public-key: ${{ secrets.GPG_PUBLIC_KEY }}
         gpg-secret-key: ${{ secrets.GPG_SECRET_KEY }}
