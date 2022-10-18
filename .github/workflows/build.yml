@@ -1,6 +1,6 @@
 name: Build
-true:
-  pull_request: null
+on:
+  pull_request:
 jobs:
   build:
     name: Build

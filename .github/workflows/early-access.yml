@@ -1,8 +1,7 @@
 name: EarlyAccess
-true:
+on:
   push:
-    branches:
-    - master
+    branches: [ master ]
 jobs:
   earlyaccess:
     name: EarlyAccess
