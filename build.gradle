@@ -2,24 +2,28 @@ config {
     info {
         description = 'Brewdis Demo'
         inceptionYear = '2020'
-        vendor = 'Redis'
-        tags = ['redis', 'redisearch', 'kafka', 'connect', 'inventory', 'real-time', 'retail']
+        tags = ['redis', 'stack', 'kafka', 'connect', 'real-time', 'inventory', 'retail']
+        
         links {
-            website      = "https://github.com/redis-developer/${project.rootProject.name}"
-            issueTracker = "https://github.com/redis-developer/${project.rootProject.name}/issues"
-            scm          = "https://github.com/redis-developer/${project.rootProject.name}.git"
+            website      = "https://github.com/redis-field-engineering/${project.rootProject.name}"
+            issueTracker = "https://github.com/redis-field-engineering/${project.rootProject.name}/issues"
+            scm          = "https://github.com/redis-field-engineering/${project.rootProject.name}.git"
         }
+        
         scm {
-            url                 = "https://github.com/redis-developer/${project.rootProject.name}"
-            connection          = "scm:git:https://github.com/redis-developer/${project.rootProject.name}.git"
-            developerConnection = "scm:git:git@github.com:redis-developer/${project.rootProject.name}.git"
+            url                 = "https://github.com/redis-field-engineering/${project.rootProject.name}"
+            connection          = "scm:git:https://github.com/redis-field-engineering/${project.rootProject.name}.git"
+            developerConnection = "scm:git:git@github.com:redis-field-engineering/${project.rootProject.name}.git"
         }
+        
         specification {
             enabled = true
         }
+        
         implementation {
             enabled = true
         }
+        
         people {
             person {
                 id = 'jruaux'
@@ -27,12 +31,21 @@ config {
                 roles = ['developer', 'author']
             }
         }
-        publishing {
-            signing {
+    }
+    
+    docs {
+        javadoc {
+            options {
+                autoLinks {
+                    enabled = false
+                }
+            }
+            aggregate {
                 enabled = false
             }
         }
     }
+
     licensing {
         enabled = false
         licenses {
@@ -41,24 +54,20 @@ config {
             }
         }
     }
-    docs {
-        javadoc {
-            enabled = false
-        }
-        sourceHtml {
-            enabled = false
-        }
-    }
 }
 
 allprojects {
     repositories {
-        gradlePluginPortal()
-        mavenCentral()
         mavenLocal()
+        gradlePluginPortal()
     }
+    
     tasks.withType(GenerateModuleMetadata) {
         enabled = false
+    }
+    
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
     }
 }
 
@@ -69,15 +78,15 @@ subprojects {
         }
     }
     
+    license {
+        exclude('build/**')
+    }
+    
     configurations.all {
-		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-			if (details.requested.name == 'lettuce-core' ) {
-				details.useVersion lettuceVersion
-			}
-		}
-	}
-    
-    sourceCompatibility = 8
-    targetCompatibility = 8
-    
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.name == 'lettuce-core' ) {
+                details.useVersion lettuceVersion
+            }
+        }
+    }
 }

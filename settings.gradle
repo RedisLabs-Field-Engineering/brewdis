@@ -1,8 +1,8 @@
 buildscript {
     repositories {
-        gradlePluginPortal()
-        mavenCentral()
         mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
     }
     dependencies {
         classpath "org.kordamp.gradle:java-project-gradle-plugin:$kordampPluginVersion"
@@ -21,17 +21,18 @@ projects {
 
     plugins {
         all {
-            id 'idea'
+            id 'eclipse'
         }
         path(':') {
             id 'org.kordamp.gradle.java-project'
         }
-        path(':brewdis-ui') {
+        dir('app') {
             id 'java-library'
+        }
+        path(':brewdis-ui') {
             id 'com.github.node-gradle.node'
         }
         path(':brewdis-api') {
-            id 'java-library'
             id 'org.springframework.boot'
             id 'io.spring.dependency-management'
         }
@@ -40,7 +41,6 @@ projects {
 
 enforce {
     mergeStrategy = 'append'
-
     rule(enforcer.rules.ForceDependencies) { r ->
         r.dependencies.addAll "com.redis:lettucemod:$lettucemodVersion",
                 "com.google.guava:guava:30.0-android",

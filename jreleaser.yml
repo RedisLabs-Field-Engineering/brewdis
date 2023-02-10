@@ -3,15 +3,15 @@ project:
   description: Brewdis Demo
   longDescription: Real-time inventory demo using Redis and Kafka
   links:
-    homepage: https://github.com/redis-field-engineering/brewdis
+    homepage: https://{{repoHost}}/{{repoOwner}}/{{repoName}}
   authors:
     - Julien Ruaux
   license: Apache-2.0
+  inceptionYear: 2021
   java:
     groupId: com.redis
     version: 17
     multiProject: true
-  inceptionYear: 2021
   tags:
     - 'redis'
     - 'real-time'    
@@ -25,9 +25,8 @@ release:
     changelog:
       formatted: ALWAYS
       preset: conventional-commits
-      format: '- {{commitShortHash}} {{commitTitle}}'
       contributors:
-        enabled: false
+        format: '- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}'
       labelers:
         - label: 'dependencies'
           title: 'regex:^(?:deps(?:\(.*\))?!?):\s.*'
@@ -45,8 +44,15 @@ release:
       hide:
         categories:
           - 'Merge'
+        contributors:
+          - 'GitHub'
+          - 'allcontributors'
       replacers:
         - search: 'deps: '
+
+signing:
+  active: ALWAYS
+  armored: true
 
 distributions:
   brewdis:
@@ -57,18 +63,27 @@ distributions:
     executable:
       name: 'brewdis-launcher'
     docker:
-      active: always
+      active: ALWAYS
       repository:
-        active: never
+        active: NEVER
       registries:
         - serverName: DEFAULT
+          server: docker.io
           repositoryName: fieldengineering
       imageNames:
-        - 'fieldengineering/redis-demo-{{distributionName}}:{{tagName}}'
-        - 'fieldengineering/redis-demo-{{distributionName}}:latest'
+        - 'fieldengineering/demo-redis-brewdis:{{tagName}}'
+        - 'fieldengineering/demo-redis-brewdis:latest'
       labels:
-        'org.opencontainers.image.title': 'brewdis'
+        'org.opencontainers.image.title': 'demo-redis-brewdis'
+      buildx:
+        enabled: true
+        platforms:
+          - 'linux/amd64'
+          - 'linux/arm64'
 
 files:
   artifacts:
     - path: VERSION
+      extraProperties:
+        skipChecksum: true
+        skipSigning: true
