@@ -3,7 +3,7 @@
 :project-owner:   redis-field-engineering
 :project-name:    brewdis
 :project-group:   com.redis
-:project-version: 0.2.0
+:project-version: 0.2.1
 
 image:https://github.com/{project-owner}/{project-name}/actions/workflows/early-access.yml/badge.svg["Build Status", link="https://github.com/{project-owner}/{project-name}/actions/workflows/early-access.yml"]
 
